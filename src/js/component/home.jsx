@@ -1,9 +1,28 @@
-import React from "react";
-import { nanoid } from "nanoid";
+import React, { useEffect } from "react";
 
 function Home() {
-	const [tarea, setTarea] = React.useState("");
 	const [pendientes, setPendientes] = React.useState([]);
+	const [tarea, setTarea] = React.useState("");
+
+	function getTarea() {
+		const Url =
+			"https://assets.breatheco.de/apis/fake/todos/user/Arielkuperman";
+		fetch(Url, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => {
+				console.log(res);
+				return res.json();
+			})
+			.then((response) => {
+				console.log(response);
+				setPendientes(response);
+			})
+			.catch((err) => console.log(err));
+	}
 
 	const agregarTarea = (e) => {
 		e.preventDefault();
@@ -12,14 +31,42 @@ function Home() {
 			return;
 		}
 
-		setPendientes([...pendientes, { id: nanoid(), NombreTarea: tarea }]);
+		setPendientes([...pendientes, { label: tarea, done: false }]);
 
 		setTarea("");
 	};
 
+	function actualizarTarea(nuevoPendiente) {
+		const Url =
+			"https://assets.breatheco.de/apis/fake/todos/user/Arielkuperman";
+		fetch(Url, {
+			method: "PUT",
+			body: JSON.stringify(nuevoPendiente),
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then((res) => {
+				return res.json();
+			})
+			.then((response) => {
+				console.log(response);
+			})
+			.catch((error) => console.log("error", error));
+	}
+
 	function eliminarTarea(id) {
-		const arrayFilter = pendientes.filter((item) => item.id !== id);
+		const arrayFilter = pendientes.filter((item, indice) => indice !== id);
+		console.log(arrayFilter);
 		setPendientes(arrayFilter);
+	}
+
+	function tareaRealizada(indice, isDone) {
+		let copiaPendientes = pendientes;
+		copiaPendientes[indice].done = !isDone;
+
+		actualizarTarea(copiaPendientes);
+		setPendientes([...copiaPendientes]);
 	}
 
 	const cantLista = () => {
@@ -33,6 +80,16 @@ function Home() {
 		height: "auto",
 		margin: "auto",
 	};
+
+	useEffect(() => {
+		if (pendientes.lenght > 0) {
+			actualizarTarea(pendientes);
+		}
+	}, []);
+
+	useEffect(() => {
+		getTarea();
+	}, []);
 
 	return (
 		<div className="row flex-fill vh-100">
@@ -52,16 +109,31 @@ function Home() {
 							value={tarea}></input>
 					</form>
 					<ul className="list-group list-group-flush w-75 mx-auto">
-						{pendientes.map((item) => (
+						{pendientes.map((item, indice) => (
 							<li
 								className="list-group-item d-flex justify-content-between"
-								key={item.id}>
-								<span className="lead">{item.NombreTarea}</span>
+								key={indice}>
+								<span
+									className="lead"
+									style={
+										item.done
+											? { textDecoration: "line-through" }
+											: {}
+									}>
+									{item.label}
+								</span>
+								<button
+									className="btn btn-success float-right"
+									onClick={() =>
+										tareaRealizada(indice, item.done)
+									}>
+									done
+								</button>
 								<button
 									className="btn btn-sm btn-close float-right"
 									aria-label="Close"
 									onClick={() =>
-										eliminarTarea(item.id)
+										eliminarTarea(indice)
 									}></button>
 							</li>
 						))}
