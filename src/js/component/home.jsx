@@ -111,10 +111,10 @@ function Home() {
 					<ul className="list-group list-group-flush w-75 mx-auto">
 						{pendientes.map((item, indice) => (
 							<li
-								className="list-group-item d-flex justify-content-between"
+								className="list-group-item d-flex bd-highlight"
 								key={indice}>
 								<span
-									className="lead"
+									className="lead p-2 flex-grow-1 bd-highlight"
 									style={
 										item.done
 											? { textDecoration: "line-through" }
@@ -122,19 +122,28 @@ function Home() {
 									}>
 									{item.label}
 								</span>
+
 								<button
-									className="btn btn-success float-right"
-									onClick={() =>
-										tareaRealizada(indice, item.done)
-									}>
-									done
-								</button>
-								<button
-									className="btn btn-sm btn-close float-right"
+									className="btn btn-close bt-sm p-2 bd-highlight align-self-center"
 									aria-label="Close"
 									onClick={() =>
 										eliminarTarea(indice)
 									}></button>
+								<button
+									className="btn btn-sm mr-5 p-2 bd-highlight"
+									onClick={() =>
+										tareaRealizada(indice, item.done)
+									}>
+									{item.done ? (
+										<button className="btn btn-sm btn-warning mr-5">
+											Not Done
+										</button>
+									) : (
+										<button className="btn btn-sm btn-success mr-5">
+											Done
+										</button>
+									)}
+								</button>
 							</li>
 						))}
 					</ul>
